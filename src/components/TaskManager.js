@@ -1,4 +1,3 @@
-// src/components/TaskManager.js
 import React, { useState, useEffect } from "react";
 import { TaskFactory } from "./TaskFactory";
 import { taskObserver } from "./TaskObserver";
@@ -10,15 +9,16 @@ const TaskManager = () => {
     TaskFactory.createTask("Design UI", "Create wireframes", "Bob"),
   ]);
 
-  // Subscribe to task updates
   useEffect(() => {
     taskObserver.subscribe(setTasks);
   }, []);
 
+  // Handle Drag Start
   const handleDragStart = (e, id) => {
     e.dataTransfer.setData("taskId", id);
   };
 
+  // Handle Drop to Update Task Status
   const handleDrop = (e, newStatus) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData("taskId");
@@ -63,4 +63,3 @@ const TaskManager = () => {
 };
 
 export default TaskManager;
-
