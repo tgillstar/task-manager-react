@@ -22,21 +22,21 @@ const TaskManager = () => {
           title: "Initial Task 1",
           description: "This is a To Do task.",
           status: "To Do",
-          owner: "Alice"
+          assignee: "Alice"
         },
         {
           id: 2,
           title: "Initial Task 2",
           description: "This one is already in progress.",
           status: "In Progress",
-          owner: "Bob"
+          assignee: "Bob"
         },
         {
           id: 3,
           title: "Initial Task 3",
           description: "This task has been completed.",
           status: "Done",
-          owner: "Charlie"
+          assignee: "Charlie"
         }
       ];
   
@@ -127,7 +127,7 @@ const TaskManager = () => {
               >
                 <h4>{task.title}</h4>
                 <p>{task.description}</p>
-                <small>Owner: {task.owner}</small>
+                <small>assignee: {task.assignee}</small>
               </div>
             ))}
         </div>
