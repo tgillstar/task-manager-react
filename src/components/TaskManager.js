@@ -79,16 +79,26 @@ const TaskManager = () => {
   };
 
   //  Handle Touch End interaction (Mobile Drop action)
-  const handleTouchEnd = (newStatus) => {
+    const handleTouchEnd = (e) => {
     if (!draggedTask) return;
-
-    const updatedTasks = tasks.map((task) =>
-      task.id === draggedTask.id ? { ...task, status: newStatus } : task
-    );
-
-    updateTasks(updatedTasks);
+  
+    const touch = e.changedTouches[0];
+    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+  
+    const column = dropTarget?.closest(".task-column");
+    const newStatus = column?.querySelector("h3")?.textContent;
+  
+    if (newStatus && ["To Do", "In Progress", "Done"].includes(newStatus)) {
+      const updatedTasks = tasks.map((task) =>
+        task.id === draggedTask.id ? { ...task, status: newStatus } : task
+      );
+  
+      updateTasks(updatedTasks);
+    }
+  
     setDraggedTask(null);
   };
+
 
   //  Handle JSON modal form
   const handleJSONSubmit = () => {
@@ -131,7 +141,6 @@ const TaskManager = () => {
             className="task-column"
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => handleDrop(e, status)}
-            onTouchEnd={() => handleTouchEnd(status)}
           >
             <h3>{status}</h3>
             {tasks
@@ -144,6 +153,7 @@ const TaskManager = () => {
                   onDragStart={(e) => handleDragStart(e, task)}
                   onTouchStart={(e) => handleTouchStart(e, task)}
                   onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd} 
                 >
                   <h4>{task.title}</h4>
                   <p>{task.description}</p>
