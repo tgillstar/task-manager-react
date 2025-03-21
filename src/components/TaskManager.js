@@ -4,63 +4,103 @@ import { taskObserver } from "./TaskObserver";
 import "../styles/TaskManager.css";
 
 const TaskManager = () => {
-  const [tasks, setTasks] = useState([
-    TaskFactory.createTask("Setup React App", "Initialize project", "Alice"),
-    TaskFactory.createTask("Design UI", "Create wireframes", "Bob"),
-  ]);
-
-  const [draggedTaskId, setDraggedTaskId] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [draggedTask, setDraggedTask] = useState(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
+  // 🏆 Load tasks from localStorage when the page loads
   useEffect(() => {
-    taskObserver.subscribe(setTasks);
+    const savedTasks = JSON.parse(localStorage.getItem("tasks"));
+  
+    if (savedTasks && savedTasks.length > 0) {
+      setTasks(savedTasks);
+    } else {
+      // If no tasks exist in localStorage, create default tasks
+      const defaultTasks = [
+        {
+          id: 1,
+          title: "Initial Task 1",
+          description: "This is a To Do task.",
+          status: "To Do",
+          owner: "Alice"
+        },
+        {
+          id: 2,
+          title: "Initial Task 2",
+          description: "This one is already in progress.",
+          status: "In Progress",
+          owner: "Bob"
+        },
+        {
+          id: 3,
+          title: "Initial Task 3",
+          description: "This task has been completed.",
+          status: "Done",
+          owner: "Charlie"
+        }
+      ];
+  
+      setTasks(defaultTasks);
+      localStorage.setItem("tasks", JSON.stringify(defaultTasks));
+    }
+  
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
-  }, []);
+  
+    taskObserver.subscribe((updatedTasks) => {
+      localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+    });
+  }, []);  
 
-  // ✅ Handle Drag Start (Desktop)
-  const handleDragStart = (e, id) => {
-    e.dataTransfer.setData("taskId", id);
-    setDraggedTaskId(id);
+  // 🏆 Function to update tasks
+  const updateTasks = (newTasks) => {
+    setTasks(newTasks);
+    localStorage.setItem("tasks", JSON.stringify(newTasks));
+    taskObserver.notify(newTasks);
   };
 
-  // ✅ Handle Drop (Desktop)
+  // 🏆 Handle Drag Start (Desktop)
+  const handleDragStart = (e, task) => {
+    e.dataTransfer.setData("taskId", task.id);
+    setDraggedTask(task);
+  };
+
+  // 🏆 Handle Drop (Desktop)
   const handleDrop = (e, newStatus) => {
     e.preventDefault();
-    const taskId = e.dataTransfer.getData("taskId") || draggedTaskId;
-    if (!taskId) return;
+    const taskId = e.dataTransfer.getData("taskId");
 
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id.toString() === taskId ? { ...task, status: newStatus } : task
-      )
+    if (!taskId && !draggedTask) return;
+
+    const updatedTasks = tasks.map((task) =>
+      task.id.toString() === (taskId || draggedTask.id)
+        ? { ...task, status: newStatus }
+        : task
     );
 
-    setDraggedTaskId(null);
-    taskObserver.notify(tasks);
+    updateTasks(updatedTasks);
+    setDraggedTask(null);
   };
 
-  // ✅ Handle Touch Start (Mobile)
-  const handleTouchStart = (e, id) => {
-    setDraggedTaskId(id);
+  // 🏆 Handle Touch Start (Mobile)
+  const handleTouchStart = (e, task) => {
+    setDraggedTask(task);
   };
 
-  // ✅ Handle Touch Move (Mobile)
+  // 🏆 Handle Touch Move (Prevent Scroll While Dragging)
   const handleTouchMove = (e) => {
-    e.preventDefault(); // Prevent scrolling while dragging
+    e.preventDefault();
   };
 
-  // ✅ Handle Touch End (Mobile)
+  // 🏆 Handle Touch End (Mobile Drop Action)
   const handleTouchEnd = (newStatus) => {
-    if (!draggedTaskId) return;
+    if (!draggedTask) return;
 
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === draggedTaskId ? { ...task, status: newStatus } : task
-      )
+    const updatedTasks = tasks.map((task) =>
+      task.id === draggedTask.id ? { ...task, status: newStatus } : task
     );
 
-    setDraggedTaskId(null);
-    taskObserver.notify(tasks);
+    updateTasks(updatedTasks);
+    setDraggedTask(null);
   };
 
   return (
@@ -71,7 +111,7 @@ const TaskManager = () => {
           className="task-column"
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => handleDrop(e, status)}
-          onTouchEnd={() => handleTouchEnd(status)} // Mobile touch handling
+          onTouchEnd={() => handleTouchEnd(status)} // Mobile support
         >
           <h3>{status}</h3>
           {tasks
@@ -81,8 +121,8 @@ const TaskManager = () => {
                 key={task.id}
                 className="task-card"
                 draggable={!isTouchDevice}
-                onDragStart={(e) => handleDragStart(e, task.id)}
-                onTouchStart={(e) => handleTouchStart(e, task.id)}
+                onDragStart={(e) => handleDragStart(e, task)}
+                onTouchStart={(e) => handleTouchStart(e, task)}
                 onTouchMove={handleTouchMove}
               >
                 <h4>{task.title}</h4>
