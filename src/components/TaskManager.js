@@ -7,43 +7,31 @@ const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
   const [draggedTask, setDraggedTask] = useState(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [jsonInput, setJsonInput] = useState("");
 
-  // 🏆 Load tasks from localStorage when the page loads
+  //  Load tasks from localStorage or set from uploaded JSON object
   useEffect(() => {
-    const savedTasks = JSON.parse(localStorage.getItem("tasks"));
+    const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
   
-    if (savedTasks && savedTasks.length > 0) {
+    if (savedTasks.length > 0) {
       setTasks(savedTasks);
-    } else {
-      // If no tasks exist in localStorage, create default tasks
-      const defaultTasks = [
-        {
-          id: 1,
-          title: "Initial Task 1",
-          description: "This is a To Do task.",
-          status: "To Do",
-          assignee: "Alice"
-        },
-        {
-          id: 2,
-          title: "Initial Task 2",
-          description: "This one is already in progress.",
-          status: "In Progress",
-          assignee: "Bob"
-        },
-        {
-          id: 3,
-          title: "Initial Task 3",
-          description: "This task has been completed.",
-          status: "Done",
-          assignee: "Charlie"
-        }
-      ];
   
+      //  Set TaskFactory starting ID to avoid collisions
+      const maxId = savedTasks.reduce((max, task) => Math.max(max, task.id || 0), 0);
+      TaskFactory.initializeId(maxId + 1);
+    } else {
+      //  Populate the columns with default tasks if none have been uploaded
+      const defaultTasks = [
+        TaskFactory.create("Initial Task 1", "This is a To Do task.", "To Do", "Alice"),
+        TaskFactory.create("Initial Task 2", "This one is already in progress.", "In Progress", "Bob"),
+        TaskFactory.create("Initial Task 3", "This task has been completed.", "Done", "Charlie"),
+      ];
       setTasks(defaultTasks);
       localStorage.setItem("tasks", JSON.stringify(defaultTasks));
     }
   
+    //  Set up the Touch action and observer to watch for any changes to the task status
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
   
     taskObserver.subscribe((updatedTasks) => {
@@ -51,24 +39,23 @@ const TaskManager = () => {
     });
   }, []);  
 
-  // 🏆 Function to update tasks
+  //  Update tasks and sync with localStorage and observers
   const updateTasks = (newTasks) => {
     setTasks(newTasks);
     localStorage.setItem("tasks", JSON.stringify(newTasks));
     taskObserver.notify(newTasks);
   };
 
-  // 🏆 Handle Drag Start (Desktop)
+  //  Handle cursor Drag Start screen action (Desktop)
   const handleDragStart = (e, task) => {
     e.dataTransfer.setData("taskId", task.id);
     setDraggedTask(task);
   };
 
-  // 🏆 Handle Drop (Desktop)
+  //  Handle cursor Drop screen action (Desktop)
   const handleDrop = (e, newStatus) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData("taskId");
-
     if (!taskId && !draggedTask) return;
 
     const updatedTasks = tasks.map((task) =>
@@ -81,17 +68,17 @@ const TaskManager = () => {
     setDraggedTask(null);
   };
 
-  // 🏆 Handle Touch Start (Mobile)
+  //  Handle Touch Start action (Mobile)
   const handleTouchStart = (e, task) => {
     setDraggedTask(task);
   };
 
-  // 🏆 Handle Touch Move (Prevent Scroll While Dragging)
+  //  Handle Touch Move action (Prevent Scroll While Dragging)
   const handleTouchMove = (e) => {
     e.preventDefault();
   };
 
-  // 🏆 Handle Touch End (Mobile Drop Action)
+  //  Handle Touch End interaction (Mobile Drop action)
   const handleTouchEnd = (newStatus) => {
     if (!draggedTask) return;
 
@@ -103,9 +90,58 @@ const TaskManager = () => {
     setDraggedTask(null);
   };
 
+  //  Handle JSON modal form
+  const handleJSONSubmit = () => {
+    try {
+      // Parse the uploaded JSON object from the user
+      const parsed = JSON.parse(jsonInput);
+      if (Array.isArray(parsed)) {
+        // Use TaskFactory to generate complete task objects
+        const factoryTasks = parsed.map((taskData) =>
+          TaskFactory.create(taskData.title, taskData.description, taskData.status, taskData.assignee)
+        );
+        updateTasks(factoryTasks);
+        setShowModal(false);
+        setJsonInput("");
+      } else {
+        alert("Invalid format: JSON must be an array of task objects.");
+      }      
+    } catch (err) {
+      alert("Invalid JSON: " + err.message);
+    }
+  };
+
   return (
     <div className="task-manager">
-      {["To Do", "In Progress", "Done"].map((status) => (
+      {/*  Upload JSON hyperlink */}
+      <div style={{ textAlign: "right", padding: "10px" }}>
+        <a href="#" onClick={() => setShowModal(true)}>
+          Upload JSON object
+        </a>
+      </div>
+
+      {/*  Modal for JSON input */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Paste Your JSON Array of Tasks</h3>
+            <textarea
+              rows="10"
+              style={{ width: "100%", marginBottom: "10px" }}
+              value={jsonInput}
+              onChange={(e) => setJsonInput(e.target.value)}
+              placeholder='[{"id":1,"title":"New Task","description":"Sample","status":"To Do","assignee":"Dana"}]'
+            />
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button onClick={handleJSONSubmit}>Submit JSON object</button>
+              <button onClick={() => setShowModal(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Task Columns */}
+      {["Done", "In Progress", "To Do"].map((status) => (
         <div
           key={status}
           className="task-column"

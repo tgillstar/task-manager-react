@@ -1,12 +1,21 @@
 // TaskFactory.js
-export class TaskFactory {
-  static createTask(title, description, assignee, status = "To Do") {
-    return {
-      id: `${Date.now()}-${Math.floor(Math.random() * 10000)}`, // Adds randomness
-      title,
-      description,
-      assignee,
-      status,
-    };
+let nextId = 1;
+
+export const TaskFactory = {
+  create: (title, description, status, assignee) => ({
+    id: nextId++,
+    title,
+    description,
+    status,
+    assignee,
+  }),
+
+  // Add a method to manually set the starting ID
+  initializeId: (startingId) => {
+    if (typeof startingId === "number" && startingId >= nextId) {
+      nextId = startingId;
+    }
   }
-}
+};
+
+
