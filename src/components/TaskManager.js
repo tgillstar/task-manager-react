@@ -9,6 +9,13 @@ const TaskManager = () => {
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [jsonInput, setJsonInput] = useState("");
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [newTaskStatus, setNewTaskStatus] = useState(""); // Tracks which column was clicked
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    assignee: ""
+  });
 
   //  Load tasks from localStorage or set from uploaded JSON object
   useEffect(() => {
@@ -88,7 +95,7 @@ const TaskManager = () => {
     const column = dropTarget?.closest(".task-column");
     const newStatus = column?.querySelector("h3")?.textContent;
   
-    if (newStatus && ["To Do", "In Progress", "Done"].includes(newStatus)) {
+    if (newStatus && ["Done", "In Progress", "To Do"].includes(newStatus)) {
       const updatedTasks = tasks.map((task) =>
         task.id === draggedTask.id ? { ...task, status: newStatus } : task
       );
@@ -135,7 +142,7 @@ const TaskManager = () => {
 
       {/* Display Task Columns */}
       <div className="task-columns">
-        {["To Do", "In Progress", "Done"].map((status) => (
+        {["Done", "In Progress", "To Do"].map((status) => (
           <div
             key={status}
             className="task-column"
@@ -160,6 +167,16 @@ const TaskManager = () => {
                   <small>assignee: {task.assignee}</small>
                 </div>
               ))}
+              <button
+                className="add-task-btn"
+                onClick={() => {
+                  setNewTaskStatus(status);
+                  setShowAddTaskModal(true);
+                }}
+              >
+                Add a Task
+              </button>
+
           </div>
         ))}
       </div>
@@ -179,6 +196,51 @@ const TaskManager = () => {
             <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
               <button onClick={handleJSONSubmit}>Submit JSON object</button>
               <button onClick={() => setShowModal(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {showAddTaskModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Add a New Task</h3>
+            <input
+              type="text"
+              placeholder="Title"
+              value={newTask.title}
+              onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+            />
+            <textarea
+              placeholder="Description"
+              value={newTask.description}
+              onChange={(e) =>
+                setNewTask({ ...newTask, description: e.target.value })
+              }
+            />
+            <input
+              type="text"
+              placeholder="Assignee"
+              value={newTask.assignee}
+              onChange={(e) => setNewTask({ ...newTask, assignee: e.target.value })}
+            />
+            <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+              <button
+                onClick={() => {
+                  const createdTask = TaskFactory.create(
+                    newTask.title,
+                    newTask.description,
+                    newTaskStatus,
+                    newTask.assignee
+                  );
+                  updateTasks([...tasks, createdTask]);
+                  setShowAddTaskModal(false);
+                  setNewTask({ title: "", description: "", assignee: "" });
+                }}
+              >
+                Submit
+              </button>
+              <button onClick={() => setShowAddTaskModal(false)}>Cancel</button>
             </div>
           </div>
         </div>
