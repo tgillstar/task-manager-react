@@ -113,14 +113,48 @@ const TaskManager = () => {
 
   return (
     <div className="task-manager">
-      {/*  Upload JSON hyperlink */}
-      <div style={{ textAlign: "right", padding: "10px" }}>
-        <a href="#" onClick={() => setShowModal(true)}>
+      {/* Display Upload JSON hyperlink */}
+      <div className="task-header">
+        <a href="#" onClick={(e) => {
+          e.preventDefault(); // prevent anchor tag default behavior
+          setShowModal(true);
+        }}>
           Upload JSON object
         </a>
       </div>
 
-      {/*  Modal for JSON input */}
+      {/* Display Task Columns */}
+      <div className="task-columns">
+        {["To Do", "In Progress", "Done"].map((status) => (
+          <div
+            key={status}
+            className="task-column"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => handleDrop(e, status)}
+            onTouchEnd={() => handleTouchEnd(status)}
+          >
+            <h3>{status}</h3>
+            {tasks
+              .filter((task) => task.status === status)
+              .map((task) => (
+                <div
+                  key={task.id}
+                  className="task-card"
+                  draggable={!isTouchDevice}
+                  onDragStart={(e) => handleDragStart(e, task)}
+                  onTouchStart={(e) => handleTouchStart(e, task)}
+                  onTouchMove={handleTouchMove}
+                >
+                  <h4>{task.title}</h4>
+                  <p>{task.description}</p>
+                  <small>assignee: {task.assignee}</small>
+                </div>
+              ))}
+          </div>
+        ))}
+      </div>
+
+      {/* Display JSON Upload Modal */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -130,46 +164,17 @@ const TaskManager = () => {
               style={{ width: "100%", marginBottom: "10px" }}
               value={jsonInput}
               onChange={(e) => setJsonInput(e.target.value)}
-              placeholder='[{"id":1,"title":"New Task","description":"Sample","status":"To Do","assignee":"Dana"}]'
+              placeholder='[{"title":"My Task","description":"Details...","status":"To Do","assignee":"Dana"}]'
             />
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
               <button onClick={handleJSONSubmit}>Submit JSON object</button>
               <button onClick={() => setShowModal(false)}>Cancel</button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Create Task Columns */}
-      {["Done", "In Progress", "To Do"].map((status) => (
-        <div
-          key={status}
-          className="task-column"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => handleDrop(e, status)}
-          onTouchEnd={() => handleTouchEnd(status)} // Mobile support
-        >
-          <h3>{status}</h3>
-          {tasks
-            .filter((task) => task.status === status)
-            .map((task) => (
-              <div
-                key={task.id}
-                className="task-card"
-                draggable={!isTouchDevice}
-                onDragStart={(e) => handleDragStart(e, task)}
-                onTouchStart={(e) => handleTouchStart(e, task)}
-                onTouchMove={handleTouchMove}
-              >
-                <h4>{task.title}</h4>
-                <p>{task.description}</p>
-                <small>assignee: {task.assignee}</small>
-              </div>
-            ))}
-        </div>
-      ))}
     </div>
-  );
+  );   
 };
 
 export default TaskManager;
