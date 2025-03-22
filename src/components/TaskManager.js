@@ -5,9 +5,12 @@ import "../styles/TaskManager.css";
 
 const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
+  const [assignees, setAssignees] = useState(() => {
+    return JSON.parse(localStorage.getItem("assignees")) || [];
+  });
   const [draggedTask, setDraggedTask] = useState(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [jsonInput, setJsonInput] = useState("");
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [newTaskStatus, setNewTaskStatus] = useState(""); // Tracks which column was clicked
@@ -52,6 +55,17 @@ const TaskManager = () => {
     setTasks(newTasks);
     localStorage.setItem("tasks", JSON.stringify(newTasks));
     taskObserver.notify(newTasks);
+  };
+
+  //  Update localStorage and state when a task is added or edited
+  const saveAssignee = (name) => {
+    if (!name) return;
+    const trimmed = name.trim();
+    if (trimmed && !assignees.includes(trimmed)) {
+      const updated = [...assignees, trimmed];
+      setAssignees(updated);
+      localStorage.setItem("assignees", JSON.stringify(updated));
+    }
   };
 
   //  Handle cursor Drag Start screen action (Desktop)
@@ -107,27 +121,45 @@ const TaskManager = () => {
     setDraggedTask(null);
   };
 
-
   //  Handle JSON modal form
   const handleJSONSubmit = () => {
     try {
-      // Parse the uploaded JSON object from the user
       const parsed = JSON.parse(jsonInput);
+  
       if (Array.isArray(parsed)) {
-        // Use TaskFactory to generate complete task objects
+        //  Create tasks using TaskFactory
         const factoryTasks = parsed.map((taskData) =>
-          TaskFactory.create(taskData.title, taskData.description, taskData.status, taskData.assignee)
+          TaskFactory.create(
+            taskData.title,
+            taskData.description,
+            taskData.status,
+            taskData.assignee
+          )
         );
-        updateTasks(factoryTasks);
-        setShowModal(false);
+  
+        //  Merge new assignees into localStorage and state
+        const uploadedAssignees = parsed
+          .map((t) => t.assignee?.trim())
+          .filter((name) => !!name && !assignees.includes(name));
+  
+        if (uploadedAssignees.length > 0) {
+          const updatedAssignees = [...assignees, ...uploadedAssignees];
+          setAssignees(updatedAssignees);
+          localStorage.setItem("assignees", JSON.stringify(updatedAssignees));
+        }
+  
+        //  Update tasks and close modal
+        const mergedTasks = [...tasks, ...factoryTasks];
+        updateTasks(mergedTasks);
+        setShowUploadModal(false);
         setJsonInput("");
       } else {
         alert("Invalid format: JSON must be an array of task objects.");
-      }      
+      }
     } catch (err) {
       alert("Invalid JSON: " + err.message);
     }
-  };
+  };    
 
    //  Handle Edit Task modal form
   const handleTaskUpdate = (updatedTask) => {
@@ -143,12 +175,24 @@ const TaskManager = () => {
     <div className="task-manager">
       {/* Display Upload JSON hyperlink */}
       <div className="task-header">
-        <a href="#" onClick={(e) => {
-          e.preventDefault(); // prevent anchor tag default behavior
-          setShowModal(true);
-        }}>
-          Upload JSON object
-        </a>
+        <header className="p-3 bg-light text-white">
+          <div className="container-fluid">
+            <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+              <div className="ms-auto text-end">
+                <button 
+                  type="button" 
+                  className="btn btn-warning" 
+                  onClick={(e) => {
+                    e.preventDefault(); // prevent anchor tag default behavior
+                    setShowUploadModal(true);
+                  }}
+                > 
+                  Upload JSON Object
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
       </div>
 
       {/* Display Task Columns */}
@@ -176,7 +220,9 @@ const TaskManager = () => {
                 >
                   <h4>{task.title}</h4>
                   <p>{task.description}</p>
+                  <div className="assignee text-end">
                   <small>assignee: {task.assignee}</small>
+                  </div>
                 </div>
               ))}
               <button
@@ -194,7 +240,7 @@ const TaskManager = () => {
       </div>
 
       {/* Display JSON Upload Modal */}
-      {showModal && (
+      {showUploadModal && (
         <>
           {/* Bootstrap backdrop */}
           <div className="modal-backdrop fade show"></div>
@@ -216,7 +262,7 @@ const TaskManager = () => {
                     type="button"
                     className="btn-close"
                     aria-label="Close"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => setShowUploadModal(false)}
                   ></button>
                 </div>
 
@@ -247,7 +293,7 @@ const TaskManager = () => {
                   </button>
                   <button
                     className="btn btn-secondary"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => setShowUploadModal(false)}
                   >
                     Cancel
                   </button>
@@ -318,14 +364,17 @@ const TaskManager = () => {
                   <div className="mb-3">
                     <label htmlFor="taskAssignee" className="form-label">Assignee</label>
                     <input
-                      id="taskAssignee"
-                      type="text"
+                      type="taskAssignee"
                       className="form-control"
+                      list="assignee-options"
                       value={newTask.assignee}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, assignee: e.target.value })
-                      }
+                      onChange={(e) => setNewTask({ ...newTask, assignee: e.target.value })}
                     />
+                    <datalist id="assignee-options">
+                      {assignees.map((name, index) => (
+                        <option key={index} value={name} />
+                      ))}
+                    </datalist>
                   </div>
                 </div>
 
@@ -341,6 +390,8 @@ const TaskManager = () => {
                         newTask.assignee
                       );
                       updateTasks([...tasks, createdTask]);
+                      saveAssignee(newTask.assignee);
+
                       setShowAddTaskModal(false);
                       setNewTask({ title: "", description: "", assignee: "" });
                     }}
@@ -413,11 +464,17 @@ const TaskManager = () => {
                     <input
                       type="text"
                       className="form-control"
+                      list="assignee-options"
                       value={editingTask.assignee}
                       onChange={(e) =>
                         setEditingTask({ ...editingTask, assignee: e.target.value })
                       }
                     />
+                    <datalist id="assignee-options">
+                      {assignees.map((name, index) => (
+                        <option key={index} value={name} />
+                      ))}
+                    </datalist>
                   </div>
 
                   <div className="mb-3">
@@ -440,7 +497,10 @@ const TaskManager = () => {
                 <div className="modal-footer">
                   <button
                     className="btn btn-primary"
-                    onClick={() => handleTaskUpdate(editingTask)}
+                    onClick={() => {
+                      handleTaskUpdate(editingTask);
+                      saveAssignee(editingTask.assignee);  
+                    }}
                   >
                     Save Changes
                   </button>
