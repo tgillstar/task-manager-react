@@ -1,70 +1,127 @@
-# Getting Started with Create React App
+#  Task Manager React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern and responsive task management application built with **React** and styled using **Bootstrap 5**, mimicking Trello-style functionality. This app supports:
 
-## Available Scripts
+-  Drag-and-drop (desktop) and touch-drag (mobile) for moving tasks across status columns  
+-  Manual task creation and editing via Bootstrap modal forms  
+-  Uploading a JSON object of tasks  
+-  Persistent state with `localStorage`  
+-  Extendable design using `TaskFactory` and `taskObserver` for ID generation and state synchronization  
 
-In the project directory, you can run:
+---
 
-### `npm start`
+##  Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+###  Task Status Columns
+- "To Do", "In Progress", and "Done" columns
+- Drag and drop tasks between columns (desktop)
+- Touch support for mobile task movement
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+###  Add a Task
+- "Add a Task" button at the bottom of each column
+- Opens a modal form prefilled with status
+- New task is assigned an auto-generated ID
 
-### `npm test`
+###  Edit a Task
+- Click any task card to open an edit modal
+- Update title, description, assignee, and status
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+###  Upload JSON Object
+- Upload task data via a JSON textarea modal
+- Automatically generates unique task IDs via `TaskFactory`
 
-### `npm run build`
+###  LocalStorage Integration
+- Tasks are saved to browser localStorage
+- Persisted across sessions
+- Synced with internal observer via `taskObserver`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+##  Technologies Used
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **React 19**
+- **Bootstrap 5**
+- **JavaScript (ES6+)**
+- **LocalStorage**
+- Custom utility modules:
+  - `TaskFactory.js` – handles unique ID generation
+  - `taskObserver.js` – basic pub/sub for task syncing
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+##  Getting Started
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 1. Clone the Repository
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+git clone https://github.com/starrry/task-manager-react.git
+cd task-manager-react
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 2. Install Dependencies
 
-## Learn More
+```bash
+npm install
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 3. Run the App
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+npm start
+```
 
-### Code Splitting
+App will be live at [http://localhost:3000](http://localhost:3000)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 4. Run Tests (if applicable)
 
-### Analyzing the Bundle Size
+```bash
+npm test
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 5. Build for Production
 
-### Making a Progressive Web App
+```bash
+npm run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+The production-ready build will be generated in the `build/` folder.
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+##  JSON Upload Format
 
-### Deployment
+To upload a task list via the "Upload JSON Object" modal, use the following format:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```json
+[
+  {
+    "title": "Example Task",
+    "description": "Write documentation",
+    "status": "To Do",
+    "assignee": "Sam"
+  }
+]
+```
 
-### `npm run build` fails to minify
+ *Task IDs are automatically added using the `TaskFactory`.*
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
+
+##  Development Notes
+
+- All tasks are managed through the central `tasks` state
+- `updateTasks()` handles syncing to localStorage and notifying observers
+- `TaskFactory` ensures all tasks have unique IDs regardless of how they're created
+- Bootstrap 5 is used for modal styling, layout, and form controls
+- The app is mobile-responsive and supports touch gestures for drag-and-drop
+
+---
+
+##  Future Enhancements
+
+- [x] Edit and update tasks
+- [x] Upload tasks via JSON
+- [x] Mobile drag/drop support
+- [ ] Add delete (or archive) task functionality
+- [ ] Filter/sort tasks
+- [ ] Add due
