@@ -7,7 +7,7 @@ const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
   const [draggedTask, setDraggedTask] = useState(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [jsonInput, setJsonInput] = useState("");
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [newTaskStatus, setNewTaskStatus] = useState(""); // Tracks which column was clicked
@@ -119,7 +119,7 @@ const TaskManager = () => {
           TaskFactory.create(taskData.title, taskData.description, taskData.status, taskData.assignee)
         );
         updateTasks(factoryTasks);
-        setShowModal(false);
+        setShowUploadModal(false);
         setJsonInput("");
       } else {
         alert("Invalid format: JSON must be an array of task objects.");
@@ -143,12 +143,24 @@ const TaskManager = () => {
     <div className="task-manager">
       {/* Display Upload JSON hyperlink */}
       <div className="task-header">
-        <a href="#" onClick={(e) => {
-          e.preventDefault(); // prevent anchor tag default behavior
-          setShowModal(true);
-        }}>
-          Upload JSON object
-        </a>
+        <header class="p-3 bg-light text-white">
+          <div class="container-fluid">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+              <div class="ms-auto text-end">
+                <button 
+                  type="button" 
+                  class="btn btn-warning" 
+                  onClick={(e) => {
+                    e.preventDefault(); // prevent anchor tag default behavior
+                    setShowUploadModal(true);
+                  }}
+                > 
+                  Upload JSON Object
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
       </div>
 
       {/* Display Task Columns */}
@@ -176,7 +188,9 @@ const TaskManager = () => {
                 >
                   <h4>{task.title}</h4>
                   <p>{task.description}</p>
+                  <div className="assignee text-end">
                   <small>assignee: {task.assignee}</small>
+                  </div>
                 </div>
               ))}
               <button
@@ -194,7 +208,7 @@ const TaskManager = () => {
       </div>
 
       {/* Display JSON Upload Modal */}
-      {showModal && (
+      {showUploadModal && (
         <>
           {/* Bootstrap backdrop */}
           <div className="modal-backdrop fade show"></div>
@@ -216,7 +230,7 @@ const TaskManager = () => {
                     type="button"
                     className="btn-close"
                     aria-label="Close"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => setShowUploadModal(false)}
                   ></button>
                 </div>
 
@@ -247,7 +261,7 @@ const TaskManager = () => {
                   </button>
                   <button
                     className="btn btn-secondary"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => setShowUploadModal(false)}
                   >
                     Cancel
                   </button>
