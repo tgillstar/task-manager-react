@@ -20,11 +20,13 @@ A modern and responsive task management application built with **React** and sty
 ###  Add a Task
 - "Add a Task" button at the bottom of each column
 - Opens a modal form prefilled with status
+- Enter a new Assignee name or use autocomplete to fill in Assignee name from existing Assignee list
 - New task is assigned an auto-generated ID
 
 ###  Edit a Task
 - Click any task card to open an edit modal
-- Update title, description, assignee, and status
+- Update title, description, and status
+- Enter a new Assignee name or use autocomplete to change Assignee from existing Assignee list
 
 ###  Upload JSON Object
 - Upload task data via a JSON textarea modal
@@ -120,6 +122,7 @@ To upload a task list via the "Upload JSON Object" modal, use the following form
 ##  Future Enhancements
 
 - [x] Edit and update tasks
+- [x] Maintain Assignee list for autocomplete funcitonality
 - [x] Upload tasks via JSON
 - [x] Mobile drag/drop support
 - [ ] Add delete (or archive) task functionality
