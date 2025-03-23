@@ -80,13 +80,13 @@ App will be live at [http://localhost:3000](http://localhost:3000)
 npm run test:coverage
 ```
 
-### 5. Build for Production
+### 5. Reset LocalStorage to start fresh (if applicable)
 
 ```bash
-npm run build
+localStorage.clear()
 ```
 
-The production-ready build will be generated in the `build/` folder.
+Clear localStorage in the browser (using the command above in dev console).
 
 ---
 
@@ -125,6 +125,7 @@ To upload a task list via the "Upload JSON Object" modal, use the following form
 - [x] Save Assignee list for autocomplete functionality
 - [x] Upload tasks via JSON
 - [x] Mobile drag/drop support
+- [ ] Upgrade from LocalStorage to database/API functionality
 - [ ] Add delete (or archive) task functionality
 - [ ] Filter/sort tasks
 - [ ] Add due date
