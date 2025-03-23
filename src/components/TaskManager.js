@@ -125,41 +125,60 @@ const TaskManager = () => {
   const handleJSONSubmit = () => {
     try {
       const parsed = JSON.parse(jsonInput);
-  
-      if (Array.isArray(parsed)) {
-        //  Create tasks using TaskFactory
-        const factoryTasks = parsed.map((taskData) =>
-          TaskFactory.create(
-            taskData.title,
-            taskData.description,
-            taskData.status,
-            taskData.assignee
-          )
+
+      //  Validates that the array of tasks inside the parsed JSON object is formatted as required
+      if (!Array.isArray(parsed)) {
+        alert(
+          "Invalid Task Array format:\n\n" +
+          "There have to 2 or more tasks or the array is not formatted as required.\n\n" +
+          "Clear off your entry to see the required format presented in the textarea."
         );
-  
-        //  Merge new assignees into localStorage and state
-        const uploadedAssignees = parsed
-          .map((t) => t.assignee?.trim())
-          .filter((name) => !!name && !assignees.includes(name));
-  
-        if (uploadedAssignees.length > 0) {
-          const updatedAssignees = [...assignees, ...uploadedAssignees];
-          setAssignees(updatedAssignees);
-          localStorage.setItem("assignees", JSON.stringify(updatedAssignees));
-        }
-  
-        //  Update tasks and close modal
-        const mergedTasks = [...tasks, ...factoryTasks];
-        updateTasks(mergedTasks);
-        setShowUploadModal(false);
-        setJsonInput("");
-      } else {
-        alert("Invalid Task Array format:\n\n" + 
-              "The task(s) in this JSON object is not formatted as required.\n\n" +
-              "Clear off your entry to see the required format presented in the textarea."
-        );
+        return;
       }
-    } catch (err) {
+  
+      //  Validate each task object has the required fields
+      const isValidTask = (t) =>
+        t.title?.trim() && t.description?.trim() && t.status?.trim() && t.assignee?.trim();
+  
+      const allValid = parsed.every(isValidTask);
+  
+      if (!allValid) {
+        alert(
+          "One or more tasks are missing required fields.\n\n" +
+          "Each task must include: title, description, status, and assignee.\n\n" +
+          "Clear off your entry to see the required format presented in the textarea."
+        );
+        return;
+      }
+  
+      //  Create tasks using TaskFactory
+      const factoryTasks = parsed.map((taskData) =>
+        TaskFactory.create(
+          taskData.title,
+          taskData.description,
+          taskData.status,
+          taskData.assignee
+        )
+      );
+
+      //  Merge new assignees into localStorage and state
+      const uploadedAssignees = parsed
+        .map((t) => t.assignee?.trim())
+        .filter((name) => !!name && !assignees.includes(name));
+
+      if (uploadedAssignees.length > 0) {
+        const updatedAssignees = [...assignees, ...uploadedAssignees];
+        setAssignees(updatedAssignees);
+        localStorage.setItem("assignees", JSON.stringify(updatedAssignees));
+      }
+
+      //  Update tasks and close modal
+      const mergedTasks = [...tasks, ...factoryTasks];
+      updateTasks(mergedTasks);
+      setShowUploadModal(false);
+      setJsonInput("");
+
+      } catch (err) {
       alert("Invalid JSON format:\n\n" + 
             "We can't process this JSON object because it's not formatted as required.\n\n" +
             "Clear off your entry to see the required format presented in the textarea."
