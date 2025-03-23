@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import TaskManager from "./components/TaskManager";
+import TaskManager from "../TaskManager";
 
 // Utility: mock localStorage for the test environment
 const mockTasks = [
