@@ -192,21 +192,31 @@ const TaskManager = () => {
     <div className="task-manager">
       {/* Display Upload JSON hyperlink */}
       <div className="task-header">
-        <header className="p-3 bg-light text-white">
+        <header className="p-3 text-white" style={{ backgroundColor: "#4b9cd3" }}>
           <div className="container-fluid">
-            <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" className="bi bi-asterisk text-black" viewBox="0 0 16 16">
-              <path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1"/>
-            </svg>
+            <div className="d-flex flex-wrap align-items-center justify-content-between">
+              <div className="d-flex align-items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  className="bi bi-asterisk text-white"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1" />
+                </svg>
+                <span className="app-title">TASK MANAGER</span>
+              </div>
               <div className="ms-auto text-end">
-                <button 
-                  type="button" 
-                  className="btn btn-warning" 
+                <button
+                  type="button"
+                  className="btn btn-warning"
                   onClick={(e) => {
-                    e.preventDefault(); // prevent anchor tag default behavior
+                    e.preventDefault();
                     setShowUploadModal(true);
                   }}
-                > 
+                >
                   Upload JSON Object
                 </button>
               </div>
@@ -248,12 +258,12 @@ const TaskManager = () => {
                   <h4>{task.title}</h4>
                   <p>{task.description}</p>
                   <div className="assignee text-end">
-                  <small>assignee: {task.assignee}</small>
+                  <small>Assignee: {task.assignee}</small>
                   </div>
                 </div>
               ))}
               <button
-                className="btn btn-primary"
+                className="btn btn-warning"
                 onClick={() => {
                   setNewTaskStatus(status);
                   setShowAddTaskModal(true);
@@ -284,7 +294,7 @@ const TaskManager = () => {
 
                 {/* Modal Header */}
                 <div className="modal-header">
-                  <h5 className="modal-title">Upload JSON Object</h5>
+                  <h4 className="modal-title">Upload JSON Object</h4>
                   <button
                     type="button"
                     className="btn-close"
@@ -313,7 +323,7 @@ const TaskManager = () => {
                 {/* Modal Footer */}
                 <div className="modal-footer">
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-warning"
                     onClick={handleJSONSubmit}
                   >
                     Submit JSON Object
@@ -351,7 +361,7 @@ const TaskManager = () => {
 
                 {/* Modal Header */}
                 <div className="modal-header">
-                  <h5 className="modal-title">Add a New Task</h5>
+                  <h4 className="modal-title">Add a New Task</h4>
                   <button
                     type="button"
                     className="btn-close"
@@ -408,7 +418,7 @@ const TaskManager = () => {
                 {/* Modal Footer */}
                 <div className="modal-footer">
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-warning"
                     onClick={() => {
                       const createdTask = TaskFactory.create(
                         newTask.title,
@@ -452,7 +462,7 @@ const TaskManager = () => {
 
                 {/* Modal Header */}
                 <div className="modal-header">
-                  <h5 className="modal-title">Edit Task</h5>
+                  <h4 className="modal-title">Edit Task</h4>
                   <button
                     type="button"
                     className="btn-close"
@@ -523,7 +533,7 @@ const TaskManager = () => {
                 {/* Modal Footer */}
                 <div className="modal-footer">
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-warning"
                     onClick={() => {
                       handleTaskUpdate(editingTask);
                       saveAssignee(editingTask.assignee);  

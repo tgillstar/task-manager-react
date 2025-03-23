@@ -34,5 +34,5 @@ test("renders initial task from localStorage", () => {
 
   expect(screen.getByText("Test Task")).toBeInTheDocument();
   expect(screen.getByText("Just a test")).toBeInTheDocument();
-  expect(screen.getByText(/assignee: Tester/)).toBeInTheDocument();
+  expect(screen.getByText(/Assignee: Tester/)).toBeInTheDocument();
 });
