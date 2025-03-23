@@ -74,10 +74,10 @@ npm start
 
 App will be live at [http://localhost:3000](http://localhost:3000)
 
-### 4. Run Tests (if applicable)
+### 4. Run Jest Tests and Get Test Coverage Report (if applicable)
 
 ```bash
-npm test
+npm run test:coverage
 ```
 
 ### 5. Build for Production

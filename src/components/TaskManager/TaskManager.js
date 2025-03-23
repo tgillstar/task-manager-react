@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { TaskFactory } from "./TaskFactory";
 import { taskObserver } from "./TaskObserver";
-import "../styles/TaskManager.css";
+import "./TaskManager.css";
 
 const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
@@ -23,32 +23,24 @@ const TaskManager = () => {
 
   //  Load tasks from localStorage or set from uploaded JSON object
   useEffect(() => {
-    const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    const savedTasks = JSON.parse(localStorage.getItem("tasks"));
   
-    if (savedTasks.length > 0) {
+    if (Array.isArray(savedTasks) && savedTasks.length > 0) {
       setTasks(savedTasks);
   
-      //  Set TaskFactory starting ID to avoid collisions
+      // Set TaskFactory starting ID to avoid collisions
       const maxId = savedTasks.reduce((max, task) => Math.max(max, task.id || 0), 0);
       TaskFactory.initializeId(maxId + 1);
-    } else {
-      //  Populate the columns with default tasks if none have been uploaded
-      const defaultTasks = [
-        TaskFactory.create("Initial Task 1", "This is a To Do task.", "To Do", "Alice"),
-        TaskFactory.create("Initial Task 2", "This one is already in progress.", "In Progress", "Bob"),
-        TaskFactory.create("Initial Task 3", "This task has been completed.", "Done", "Charlie"),
-      ];
-      setTasks(defaultTasks);
-      localStorage.setItem("tasks", JSON.stringify(defaultTasks));
     }
   
-    //  Set up the Touch action and observer to watch for any changes to the task status
+    // Detect touch devices for drag behavior
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
   
+    // Subscribe to task updates to sync with localStorage
     taskObserver.subscribe((updatedTasks) => {
       localStorage.setItem("tasks", JSON.stringify(updatedTasks));
     });
-  }, []);  
+  }, []);    
 
   //  Update tasks and sync with localStorage and observers
   const updateTasks = (newTasks) => {
@@ -200,21 +192,31 @@ const TaskManager = () => {
     <div className="task-manager">
       {/* Display Upload JSON hyperlink */}
       <div className="task-header">
-        <header className="p-3 bg-light text-white">
+        <header className="p-3 text-white" style={{ backgroundColor: "#4b9cd3" }}>
           <div className="container-fluid">
-            <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" className="bi bi-asterisk text-black" viewBox="0 0 16 16">
-              <path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1"/>
-            </svg>
+            <div className="d-flex flex-wrap align-items-center justify-content-between">
+              <div className="d-flex align-items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  className="bi bi-asterisk text-white"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1" />
+                </svg>
+                <span className="app-title">TASK MANAGER</span>
+              </div>
               <div className="ms-auto text-end">
-                <button 
-                  type="button" 
-                  className="btn btn-warning" 
+                <button
+                  type="button"
+                  className="btn btn-warning"
                   onClick={(e) => {
-                    e.preventDefault(); // prevent anchor tag default behavior
+                    e.preventDefault();
                     setShowUploadModal(true);
                   }}
-                > 
+                >
                   Upload JSON Object
                 </button>
               </div>
@@ -222,6 +224,13 @@ const TaskManager = () => {
           </div>
         </header>
       </div>
+      
+      {/* Display Intro Message to User If There Are Currently No Tasks */}
+      {tasks.length === 0 && (
+        <div className="alert alert-info text-center mt-3">
+          No tasks yet. Add a task manually or upload a JSON object to get started.
+        </div>
+      )}
 
       {/* Display Task Columns */}
       <div className="task-columns">
@@ -249,12 +258,12 @@ const TaskManager = () => {
                   <h4>{task.title}</h4>
                   <p>{task.description}</p>
                   <div className="assignee text-end">
-                  <small>assignee: {task.assignee}</small>
+                  <small>Assignee: {task.assignee}</small>
                   </div>
                 </div>
               ))}
               <button
-                className="btn btn-primary"
+                className="btn btn-warning"
                 onClick={() => {
                   setNewTaskStatus(status);
                   setShowAddTaskModal(true);
@@ -285,7 +294,7 @@ const TaskManager = () => {
 
                 {/* Modal Header */}
                 <div className="modal-header">
-                  <h5 className="modal-title">Upload JSON Object</h5>
+                  <h4 className="modal-title">Upload JSON Object</h4>
                   <button
                     type="button"
                     className="btn-close"
@@ -314,7 +323,7 @@ const TaskManager = () => {
                 {/* Modal Footer */}
                 <div className="modal-footer">
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-warning"
                     onClick={handleJSONSubmit}
                   >
                     Submit JSON Object
@@ -352,7 +361,7 @@ const TaskManager = () => {
 
                 {/* Modal Header */}
                 <div className="modal-header">
-                  <h5 className="modal-title">Add a New Task</h5>
+                  <h4 className="modal-title">Add a New Task</h4>
                   <button
                     type="button"
                     className="btn-close"
@@ -409,7 +418,7 @@ const TaskManager = () => {
                 {/* Modal Footer */}
                 <div className="modal-footer">
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-warning"
                     onClick={() => {
                       const createdTask = TaskFactory.create(
                         newTask.title,
@@ -453,7 +462,7 @@ const TaskManager = () => {
 
                 {/* Modal Header */}
                 <div className="modal-header">
-                  <h5 className="modal-title">Edit Task</h5>
+                  <h4 className="modal-title">Edit Task</h4>
                   <button
                     type="button"
                     className="btn-close"
@@ -524,7 +533,7 @@ const TaskManager = () => {
                 {/* Modal Footer */}
                 <div className="modal-footer">
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-warning"
                     onClick={() => {
                       handleTaskUpdate(editingTask);
                       saveAssignee(editingTask.assignee);  
