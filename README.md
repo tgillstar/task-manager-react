@@ -122,9 +122,10 @@ To upload a task list via the "Upload JSON Object" modal, use the following form
 ##  Future Enhancements
 
 - [x] Edit and update tasks
-- [x] Maintain Assignee list for autocomplete funcitonality
+- [x] Save Assignee list for autocomplete functionality
 - [x] Upload tasks via JSON
 - [x] Mobile drag/drop support
 - [ ] Add delete (or archive) task functionality
 - [ ] Filter/sort tasks
-- [ ] Add due
+- [ ] Add due date
+- [ ] Customize status columns

@@ -154,10 +154,16 @@ const TaskManager = () => {
         setShowUploadModal(false);
         setJsonInput("");
       } else {
-        alert("Invalid format: JSON must be an array of task objects.");
+        alert("Invalid Task Array format:\n\n" + 
+              "The task(s) in this JSON object is not formatted as required.\n\n" +
+              "Clear off your entry to see the required format presented in the textarea."
+        );
       }
     } catch (err) {
-      alert("Invalid JSON: " + err.message);
+      alert("Invalid JSON format:\n\n" + 
+            "We can't process this JSON object because it's not formatted as required.\n\n" +
+            "Clear off your entry to see the required format presented in the textarea."
+      );
     }
   };    
 
@@ -178,6 +184,9 @@ const TaskManager = () => {
         <header className="p-3 bg-light text-white">
           <div className="container-fluid">
             <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" className="bi bi-asterisk text-black" viewBox="0 0 16 16">
+              <path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1"/>
+            </svg>
               <div className="ms-auto text-end">
                 <button 
                   type="button" 
