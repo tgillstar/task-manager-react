@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import TaskManager from "../TaskManager";
 
 
@@ -15,7 +15,7 @@ beforeAll(() => {
   
   test("alerts on invalid JSON format (malformed)", () => {
     render(<TaskManager />);
-    fireEvent.click(screen.getByText("Upload JSON object"));
+    fireEvent.click(screen.getByText(/upload json object/i));
   
     const textarea = screen.getByPlaceholderText(/\[{"title":/);
     fireEvent.change(textarea, {
@@ -24,26 +24,26 @@ beforeAll(() => {
       }
     });
   
-    fireEvent.click(screen.getByText("Submit JSON object"));
-    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Invalid JSON format"));
+    fireEvent.click(screen.getByText(/submit json object/i));
+    expect(window.alert).toHaveBeenCalledWith(expect.stringMatching(/invalid json format/i));
   });
   
   test("alerts when uploaded data is not an array", () => {
     render(<TaskManager />);
-    fireEvent.click(screen.getByText("Upload JSON object"));
+    fireEvent.click(screen.getByText(/upload json object/i));
   
     const textarea = screen.getByPlaceholderText(/\[{"title":/);
     fireEvent.change(textarea, {
       target: { value: '{"title": "This is not an array"}' }
     });
   
-    fireEvent.click(screen.getByText("Submit JSON object"));
-    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Invalid Task Array format"));
+    fireEvent.click(screen.getByText(/submit json object/i));
+    expect(window.alert).toHaveBeenCalledWith(expect.stringMatching(/invalid task array format/i));
   });
   
   test("alerts when task JSON is missing fields", () => {
     render(<TaskManager />);
-    fireEvent.click(screen.getByText("Upload JSON object"));
+    fireEvent.click(screen.getByText(/upload json object/i));
   
     const textarea = screen.getByPlaceholderText(/\[{"title":/);
     fireEvent.change(textarea, {
@@ -52,13 +52,13 @@ beforeAll(() => {
       }
     });
   
-    fireEvent.click(screen.getByText("Submit JSON object"));
-    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Missing required fields"));
+    fireEvent.click(screen.getByText(/submit json object/i));
+    expect(window.alert).toHaveBeenCalledWith(expect.stringMatching(/missing required fields/i));
   });
   
   test("adds valid task from JSON upload and stores assignee", () => {
     render(<TaskManager />);
-    fireEvent.click(screen.getByText("Upload JSON object"));
+    fireEvent.click(screen.getByText(/upload json object/i));
   
     const textarea = screen.getByPlaceholderText(/\[{"title":/);
     fireEvent.change(textarea, {
@@ -74,7 +74,7 @@ beforeAll(() => {
       }
     });
   
-    fireEvent.click(screen.getByText("Submit JSON object"));
+    fireEvent.click(screen.getByText(/submit json object/i));
   
     // 🧪 Expect new task to be rendered
     expect(screen.getByText("New Upload Task")).toBeInTheDocument();
