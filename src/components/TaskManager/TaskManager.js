@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { TaskFactory } from "./TaskFactory";
 import { taskObserver } from "./TaskObserver";
-import "../styles/TaskManager.css";
+import "./TaskManager.css";
 
 const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
@@ -23,32 +23,24 @@ const TaskManager = () => {
 
   //  Load tasks from localStorage or set from uploaded JSON object
   useEffect(() => {
-    const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    const savedTasks = JSON.parse(localStorage.getItem("tasks"));
   
-    if (savedTasks.length > 0) {
+    if (Array.isArray(savedTasks) && savedTasks.length > 0) {
       setTasks(savedTasks);
   
-      //  Set TaskFactory starting ID to avoid collisions
+      // Set TaskFactory starting ID to avoid collisions
       const maxId = savedTasks.reduce((max, task) => Math.max(max, task.id || 0), 0);
       TaskFactory.initializeId(maxId + 1);
-    } else {
-      //  Populate the columns with default tasks if none have been uploaded
-      const defaultTasks = [
-        TaskFactory.create("Initial Task 1", "This is a To Do task.", "To Do", "Alice"),
-        TaskFactory.create("Initial Task 2", "This one is already in progress.", "In Progress", "Bob"),
-        TaskFactory.create("Initial Task 3", "This task has been completed.", "Done", "Charlie"),
-      ];
-      setTasks(defaultTasks);
-      localStorage.setItem("tasks", JSON.stringify(defaultTasks));
     }
   
-    //  Set up the Touch action and observer to watch for any changes to the task status
+    // Detect touch devices for drag behavior
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
   
+    // Subscribe to task updates to sync with localStorage
     taskObserver.subscribe((updatedTasks) => {
       localStorage.setItem("tasks", JSON.stringify(updatedTasks));
     });
-  }, []);  
+  }, []);    
 
   //  Update tasks and sync with localStorage and observers
   const updateTasks = (newTasks) => {
@@ -222,6 +214,13 @@ const TaskManager = () => {
           </div>
         </header>
       </div>
+      
+      {/* Display Intro Message to User If There Are Currently No Tasks */}
+      {tasks.length === 0 && (
+        <div className="alert alert-info text-center mt-3">
+          No tasks yet. Add a task manually or upload a JSON object to get started.
+        </div>
+      )}
 
       {/* Display Task Columns */}
       <div className="task-columns">
