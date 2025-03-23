@@ -125,39 +125,64 @@ const TaskManager = () => {
   const handleJSONSubmit = () => {
     try {
       const parsed = JSON.parse(jsonInput);
-  
-      if (Array.isArray(parsed)) {
-        //  Create tasks using TaskFactory
-        const factoryTasks = parsed.map((taskData) =>
-          TaskFactory.create(
-            taskData.title,
-            taskData.description,
-            taskData.status,
-            taskData.assignee
-          )
+
+      //  Validates that the array of tasks inside the parsed JSON object is formatted as required
+      if (!Array.isArray(parsed)) {
+        alert(
+          "Invalid Task Array format:\n\n" +
+          "There have to 2 or more tasks or the array is not formatted as required.\n\n" +
+          "Clear off your entry to see the required format presented in the textarea."
         );
-  
-        //  Merge new assignees into localStorage and state
-        const uploadedAssignees = parsed
-          .map((t) => t.assignee?.trim())
-          .filter((name) => !!name && !assignees.includes(name));
-  
-        if (uploadedAssignees.length > 0) {
-          const updatedAssignees = [...assignees, ...uploadedAssignees];
-          setAssignees(updatedAssignees);
-          localStorage.setItem("assignees", JSON.stringify(updatedAssignees));
-        }
-  
-        //  Update tasks and close modal
-        const mergedTasks = [...tasks, ...factoryTasks];
-        updateTasks(mergedTasks);
-        setShowUploadModal(false);
-        setJsonInput("");
-      } else {
-        alert("Invalid format: JSON must be an array of task objects.");
+        return;
       }
-    } catch (err) {
-      alert("Invalid JSON: " + err.message);
+  
+      //  Validate each task object has the required fields
+      const isValidTask = (t) =>
+        t.title?.trim() && t.description?.trim() && t.status?.trim() && t.assignee?.trim();
+  
+      const allValid = parsed.every(isValidTask);
+  
+      if (!allValid) {
+        alert(
+          "One or more tasks are missing required fields.\n\n" +
+          "Each task must include: title, description, status, and assignee.\n\n" +
+          "Clear off your entry to see the required format presented in the textarea."
+        );
+        return;
+      }
+  
+      //  Create tasks using TaskFactory
+      const factoryTasks = parsed.map((taskData) =>
+        TaskFactory.create(
+          taskData.title,
+          taskData.description,
+          taskData.status,
+          taskData.assignee
+        )
+      );
+
+      //  Merge new assignees into localStorage and state
+      const uploadedAssignees = parsed
+        .map((t) => t.assignee?.trim())
+        .filter((name) => !!name && !assignees.includes(name));
+
+      if (uploadedAssignees.length > 0) {
+        const updatedAssignees = [...assignees, ...uploadedAssignees];
+        setAssignees(updatedAssignees);
+        localStorage.setItem("assignees", JSON.stringify(updatedAssignees));
+      }
+
+      //  Update tasks and close modal
+      const mergedTasks = [...tasks, ...factoryTasks];
+      updateTasks(mergedTasks);
+      setShowUploadModal(false);
+      setJsonInput("");
+
+      } catch (err) {
+      alert("Invalid JSON format:\n\n" + 
+            "We can't process this JSON object because it's not formatted as required.\n\n" +
+            "Clear off your entry to see the required format presented in the textarea."
+      );
     }
   };    
 
@@ -178,6 +203,9 @@ const TaskManager = () => {
         <header className="p-3 bg-light text-white">
           <div className="container-fluid">
             <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" className="bi bi-asterisk text-black" viewBox="0 0 16 16">
+              <path d="M8 0a1 1 0 0 1 1 1v5.268l4.562-2.634a1 1 0 1 1 1 1.732L10 8l4.562 2.634a1 1 0 1 1-1 1.732L9 9.732V15a1 1 0 1 1-2 0V9.732l-4.562 2.634a1 1 0 1 1-1-1.732L6 8 1.438 5.366a1 1 0 0 1 1-1.732L7 6.268V1a1 1 0 0 1 1-1"/>
+            </svg>
               <div className="ms-auto text-end">
                 <button 
                   type="button" 
